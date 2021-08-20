@@ -6,7 +6,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import uz.javokhir.sendEmailService.model.EmailRequest;
+import uz.javokhir.sendEmailService.model.request.EmailRequest;
 import uz.javokhir.sendEmailService.property.MailProperties;
 
 
@@ -16,17 +16,17 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class EmailService {
+public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender javaMailSender;
     private final MailProperties mailProperties;
 
     @Async
-    public boolean sendEmail(EmailRequest emailRequest) {
+    @Override
+    public void sendEmail(EmailRequest emailRequest) {
         log.info("Send email to {}, fullName {}, message {}",
                 mailProperties.getReceiver(), emailRequest.getFullName(), emailRequest.getMessage());
 
-        boolean sent = false;
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
             MimeMessageHelper message = new MimeMessageHelper(mimeMessage, StandardCharsets.UTF_8.name());
@@ -35,10 +35,8 @@ public class EmailService {
             message.setSubject(emailRequest.getSubject());
             message.setText(" FullName: " + emailRequest.getFullName() + "\nMessage: " + emailRequest.getMessage());
             javaMailSender.send(mimeMessage);
-            sent = true;
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return sent;
     }
 }
